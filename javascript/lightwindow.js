@@ -153,8 +153,8 @@ lightwindow.prototype = {
 			EOLASFix : 'swf,wmv,fla,flv',
 			overlay : {
 				opacity : 0.7,
-				image : 'images/black.png',
-				presetImage : 'images/black-70.png'
+				image : '#{imgPrefix}images/black.png',
+				presetImage : '#{imgPrefix}images/black-70.png'
 			},
 			skin : 	{
 				main : 	'<div id="lightwindow_container" >'+
@@ -204,7 +204,7 @@ lightwindow.prototype = {
 							'</div>'+
 						'</div>',	
 				loading : 	'<div id="lightwindow_loading" >'+
-								'<img src="images/ajax-loading.gif" alt="loading" />'+
+								'<img src="#{imgPrefix}images/ajax-loading.gif" alt="loading" />'+
 								'<span>Loading or <a href="javascript: myLightWindow.deactivate();">Cancel</a></span>'+
 								'<iframe name="lightwindow_loading_shim" id="lightwindow_loading_shim" src="javascript:false;" frameBorder="0" scrolling="no"></iframe>'+
 							'</div>',
@@ -235,9 +235,11 @@ lightwindow.prototype = {
 			finalAnimationHandler : false,
 			formHandler : false,
 			galleryAnimationHandler : false,
-			showGalleryCount : true
+			showGalleryCount : true,
+			imgPrefix : ''
 		}, options || {});
 		this.duration = ((11-this.options.resizeSpeed)*0.15);
+		this._applyImgPrefix();
 		this._setupLinks();
 		this._getScroll();
 		this._getPageDimensions();
@@ -426,6 +428,22 @@ lightwindow.prototype = {
 			}
 		}
 	},
+	
+	//
+	// Apply imgPrefix to overlay and skin elements
+	//
+	_applyImgPrefix : function(){
+	    this.options.overlay.image =  this._replaceImgPrefixHolder(this.options.overlay.image);
+	    this.options.overlay.presetImage =  this._replaceImgPrefixHolder(this.options.overlay.presetImage);
+	    this.options.skin.main =  this._replaceImgPrefixHolder(this.options.skin.main);
+	    this.options.skin.loading =  this._replaceImgPrefixHolder(this.options.skin.loading);
+	},
+	
+	_replaceImgPrefixHolder : function(string){
+	    string = string.gsub("#{imgPrefix}",this.options.imgPrefix)
+	    return string
+	},
+	
 	// 
 	//  Set Links Up
 	//
@@ -785,6 +803,7 @@ lightwindow.prototype = {
 	},
 	//
 	//	Setup Dimensions of lightwindow.
+
 
 	//
 	_setupDimensions : function() {
@@ -1917,5 +1936,9 @@ Event.observe(window, 'load', lightwindowInit, false);
 //
 var myLightWindow = null;
 function lightwindowInit() {
-	myLightWindow = new lightwindow();
+    try{
+	    myLightWindow = new lightwindow(lightwindowOptions);
+	}catch(err){ // no options have been defined
+	    myLightWindow = new lightwindow();	
+	}
 }
